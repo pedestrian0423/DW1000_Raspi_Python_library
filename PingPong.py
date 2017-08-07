@@ -6,7 +6,6 @@ It requires the following modules: DW1000, DW1000Constants
 
 
 import DW1000
-import time
 import DW1000Constants as C
 
 msg = ""
