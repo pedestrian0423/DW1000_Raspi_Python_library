@@ -16,7 +16,7 @@ expectedMsgId = C.POLL_ACK
 timePollSentTS = 0
 timeRangeSentTS = 0
 timePollAckReceivedTS = 0
-replyDelayTimeUS = 3000
+replyDelayTimeUS = 7000
 
 
 def millis():
