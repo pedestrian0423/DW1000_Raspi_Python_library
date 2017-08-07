@@ -22,7 +22,7 @@ timeRangeReceivedTS = 0
 timePollSentTS = 0
 timeRangeSentTS = 0
 timeComputedRangeTS = 0
-replyDelayTimeUS = 9000
+replyDelayTimeUS = 3000
 
 
 def millis():
