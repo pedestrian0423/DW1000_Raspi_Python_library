@@ -174,7 +174,7 @@ try:
     DW1000.begin(PIN_IRQ)
     DW1000.setup(PIN_SS)
     print("DW1000 initialized")
-    print("############### ANCHOR ##############")
+    print("############### ANCHOR ###############")
 
     DW1000.generalConfiguration("82:17:5B:D5:A9:9A:E2:9C", C.MODE_LONGDATA_RANGE_ACCURACY)
     DW1000.registerCallback("handleSent", handleSent)
