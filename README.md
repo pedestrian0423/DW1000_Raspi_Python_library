@@ -8,7 +8,7 @@ The following external python modules/libraries are necessary for its proper use
 * [monotonic] (used in the ranging scripts only) : This module provides a function returning the value of a clock which never goes backwards. If you have Python 3 installed on your Raspberry Pi, it is not required since you can use time.monotonic() instead.
 * [RPi.GPIO] : This is the standard python module used to interact with the GPIOs available on the Raspberry Pi.
 
-[arduino-dw1000]: <https://github.com/thotro/arduino-dw1000>
+[arduino-dw1000]: <https://github.com/ThingType/arduino-dw1000>
 [monotonic]: <https://github.com/atdt/monotonic>
 [spidev]: <https://github.com/doceme/py-spidev>
 [RPi.GPIO]: <https://sourceforge.net/p/raspberry-gpio-python/wiki/install/>
