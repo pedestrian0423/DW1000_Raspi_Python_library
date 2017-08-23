@@ -113,7 +113,7 @@ def handleInterrupt(channel):
             startReceive()
     elif msgReceived:
         callbacks["handleReceived"]()
-        clearReceiveStatus()
+        clearReceiveStatus()                
         if _permanentReceive:
             # no need to start a new receive since we enabled the permanent receive mode in the system configuration register. it created an interference causing problem
             # with the reception
@@ -184,11 +184,18 @@ def setDefaultConfiguration():
     """
     This function sets the default mode on the chip initialization : MODE_LONGDATA_RANGE_LOWPOWER and with receive/transmit mask activated when in IDLE mode.
     """
+    global _syscfg, _sysmask
     if (_deviceMode == C.TX_MODE):
         pass
     elif _deviceMode == C.RX_MODE:
         pass
     elif _deviceMode == C.IDLE_MODE:
+        _syscfg[2] &= C.ENABLE_MODE_MASK2
+        _syscfg[2] |= 0x00
+        
+        setBit(_syscfg, 4, C.DIS_STXP_BIT, True)
+        setBit(_syscfg, 4, C.FFEN_BIT, False)
+        
         # interrupt on sent
         setBit(_sysmask, 4, C.MTXFRS_BIT, True)
         # interrupt on received
@@ -920,7 +927,9 @@ def getReceivePower():
     else:
         A = C.A_64MHZ
         corrFac = C.CORRFAC_64MHZ
-    estRXPower = C.PWR_COEFF2 * math.log10((cir * C.TWOPOWER17) / (N * N)) - A
+    estRXPower = 0
+    if ((float(cir) * float(C.TWOPOWER17)) / (float(N) * float(N)) > 0): 
+        estRXPower = C.PWR_COEFF2 * math.log10((float(cir) * float(C.TWOPOWER17)) / (float(N) * float(N))) - A
     if estRXPower <= -C.PWR_COEFF:
         return estRXPower
     else:
@@ -1228,6 +1237,7 @@ def getData(datalength):
             The data read in the RX buffer as an array byte.
     """
     data = [0] * datalength
+    time.sleep(0.000005)
     readBytes(C.RX_BUFFER, C.NO_SUB, data, datalength)
     return data
 
@@ -1439,7 +1449,7 @@ def writeValueToBytes(data, val, n):
             The modified array of bytes.
     """
     for i in range(0, n):
-        data[i] = ((val >> (i * 8)) & C.MASK_LS_BYTE)
+        data[i] = int(((val >> (i * 8)) & C.MASK_LS_BYTE))
     return data
 
 
