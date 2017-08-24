@@ -14,7 +14,8 @@ expectedMsgId = C.POLL
 protocolFailed = False
 sentAck = False
 receivedAck = False
-data = [0] * 16
+LEN_DATA = 16
+data = [0] * LEN_DATA
 timePollAckSentTS = 0
 timePollAckReceivedTS = 0
 timePollReceivedTS = 0
@@ -22,7 +23,7 @@ timeRangeReceivedTS = 0
 timePollSentTS = 0
 timeRangeSentTS = 0
 timeComputedRangeTS = 0
-replyDelayTimeUS = 7000
+REPLY_DELAY_TIME_US = 7000 
 
 
 def millis():
@@ -30,7 +31,7 @@ def millis():
     This function returns the value (in milliseconds) of a clock which never goes backwards. It detects the inactivity of the chip and
     is used to avoid having the chip stuck in an undesirable state.
     """    
-    return int(round(monotonic.monotonic() * 1000))
+    return int(round(monotonic.monotonic() * C.MILLISECONDS))
 
 
 def handleSent():
@@ -63,8 +64,8 @@ def resetInactive():
     """
     This function restarts the default polling operation when the device is deemed inactive.
     """    
-    print("reset inactive")
     global expectedMsgId
+    # print("reset inactive")    
     expectedMsgId = C.POLL
     receiver()
     noteActivity()
@@ -77,8 +78,8 @@ def transmitPollAck():
     global data
     DW1000.newTransmit()
     data[0] = C.POLL_ACK
-    DW1000.setDelay(replyDelayTimeUS, C.MICROSECONDS)
-    DW1000.setData(data, 16)
+    DW1000.setDelay(REPLY_DELAY_TIME_US, C.MICROSECONDS)
+    DW1000.setData(data, LEN_DATA)
     DW1000.startTransmit()
 
 
@@ -89,7 +90,7 @@ def transmitRangeAcknowledge():
     global data
     DW1000.newTransmit()
     data[0] = C.RANGE_REPORT
-    DW1000.setData(data, 16)
+    DW1000.setData(data, LEN_DATA)
     DW1000.startTransmit()
 
 
@@ -100,7 +101,7 @@ def transmitRangeFailed():
     global data
     DW1000.newTransmit()
     data[0] = C.RANGE_FAILED
-    DW1000.setData(data, 16)
+    DW1000.setData(data, LEN_DATA)
     DW1000.startTransmit()
 
 
@@ -108,6 +109,7 @@ def receiver():
     """
     This function configures the chip to prepare for a message reception.
     """    
+    global data
     DW1000.newReceive()
     DW1000.receivePermanently()
     DW1000.startReceive()
@@ -141,7 +143,7 @@ def loop():
 
     if receivedAck:
         receivedAck = False
-        data = DW1000.getData(16)
+        data = DW1000.getData(LEN_DATA)
         msgId = data[0]
         if msgId != expectedMsgId:
             protocolFailed = True
@@ -162,25 +164,27 @@ def loop():
                 transmitRangeAcknowledge()
                 distance = (timeComputedRangeTS % C.TIME_OVERFLOW) * C.DISTANCE_OF_RADIO
                 print("Distance: %.2f m" %(distance))
+
             else:
                 transmitRangeFailed()
 
             noteActivity()
 
 
-try:
+
+try:    
     PIN_IRQ = 19
     PIN_SS = 16
     DW1000.begin(PIN_IRQ)
     DW1000.setup(PIN_SS)
     print("DW1000 initialized")
-    print("############### ANCHOR ###############")
+    print("############### ANCHOR ##############")
 
     DW1000.generalConfiguration("82:17:5B:D5:A9:9A:E2:9C", C.MODE_LONGDATA_RANGE_ACCURACY)
     DW1000.registerCallback("handleSent", handleSent)
     DW1000.registerCallback("handleReceived", handleReceived)
     DW1000.setAntennaDelay(C.ANTENNA_DELAY_RASPI)
-    
+
     receiver()
     noteActivity()
     while 1:
