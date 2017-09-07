@@ -887,7 +887,7 @@ def getFirstPathPower():
     rxFrameInfo = [None] * 4
     readBytes(C.RX_TIME, C.FP_AMPL1_SUB, fpAmpl1Bytes, 2)
     readBytes(C.RX_FQUAL, C.FP_AMPL2_SUB, fpAmpl2Bytes, 2)
-    readBytes(C.RX_FQUAL, C.PP_AMPL3_SUB, fpAmpl3Bytes, 2)
+    readBytes(C.RX_FQUAL, C.FP_AMPL3_SUB, fpAmpl3Bytes, 2)
     readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
     f1 = fpAmpl1Bytes[0] | fpAmpl1Bytes[1] << 8
     f2 = fpAmpl2Bytes[0] | fpAmpl2Bytes[1] << 8
