@@ -1152,52 +1152,10 @@ def getTransmitTimestamp():
     return timeStamp
 
 
-def setTimeStamp(data, timeStamp, index):
-    """
-    This function sets the specified timestamp into the data that will be sent.
-
-    Args:
-            data: The data where you will store the timestamp
-            timeStamp = The timestamp's value
-            index = The bit from where you will put the timestamp's value
-
-    Returns:
-            The data with the timestamp added to it
-    """
-    for i in range(0, 5):
-        data[i+index] = int((timeStamp >> (i * 8)) & C.MASK_LS_BYTE)
 
 
-def getTimeStamp(data, index):
-    """
-    This function gets the timestamp's value written inside the specified data and returns it.
-
-    Args:
-            data : the data where you want to extract the timestamp from
-            index : the index you want to start reading the data from
-
-    Returns:
-            The timestamp's value read from the given data.
-    """
-    timestamp = 0
-    for i in range(0, 5):
-        timestamp |= data[i+index] << (i*8)
-    return timestamp
 
 
-def wrapTimestamp(timestamp):
-    """
-    This function converts the negative values of the timestamp due to the overflow into a correct one.
-
-    Args :
-            timestamp : the timestamp's value you want to correct.
-    
-    Returns:
-            The corrected timestamp's value.
-    """
-    if timestamp < 0:
-        timestamp += C.TIME_OVERFLOW
-    return timestamp
 
         
 """
