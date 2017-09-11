@@ -1,6 +1,6 @@
 """
     DW1000Device.py
-    This class maintains remote devices to get activity and other information
+    This python module maintains remote devices to get activity and other information
     (range, rx_power, fp_power, quality, last received time)
 """
 
