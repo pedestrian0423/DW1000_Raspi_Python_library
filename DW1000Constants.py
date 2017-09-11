@@ -432,7 +432,7 @@ TIME_OVERFLOW = 0x10000000000
 TIME_MAX = 0xffffffffff
 
 # Time factors (relative to [us]) for setting delayed transceive
-# TODO use non float
+# TODO use non float (?)
 SECONDS = 1000000
 MILLISECONDS = 1000
 MICROSECONDS = 1
