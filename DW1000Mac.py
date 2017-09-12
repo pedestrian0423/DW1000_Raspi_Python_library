@@ -8,7 +8,7 @@ import DW1000Ranging
 class DW1000Mac():
     _seq_number = 0
 
-    def __init__ (self):
+    def __init__(self):
         self._seq_number = 0
 
     def generate_blink_frame(self, source_address, source_short_address):
@@ -137,8 +137,8 @@ class DW1000Mac():
 
     def decode_long_mac_frame(self, frame):
         address = bytearray()
-        address.append(14)
-        address.append(13)
+        address.append(frame[14])
+        address.append(frame[13])
 
         return address
 

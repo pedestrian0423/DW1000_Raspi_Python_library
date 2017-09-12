@@ -3,12 +3,12 @@
     This python module maintains remote devices to get activity and other information
     (range, rx_power, fp_power, quality, last received time)
 """
-
+import random
+import time
 import DW1000Constants as C
 import DW1000Time
 import DW1000Mac
-import random
-import time
+
 
 class DW1000Device(object):
     timePollSent = DW1000Time
