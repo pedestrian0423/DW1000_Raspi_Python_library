@@ -10,7 +10,7 @@ import DW1000Time
 import DW1000Mac
 
 
-class DW1000Device(object):
+class DW1000DistantDevice(object):
     timePollSent = DW1000Time
     timePollReceived = DW1000Time
     timePollAckSent = DW1000Time
