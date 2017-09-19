@@ -159,20 +159,20 @@ device = 0
 rangingTag = RangingTag(irq=irq, rst=rst, bus=bus, device=device)
 
 try:
-    dw1000_device.setup(ss)
+    rangingTag.dw1000_device.setup(ss)
     print("DW1000 initialized")
     print("############### TAG ##############")	
 
-    dw1000_device.generalConfiguration("7D:00:22:EA:82:60:3B:9C", C.MODE_LONGDATA_RANGE_ACCURACY)
-    dw1000_device.registerCallback("handleSent", RaingingTag.handleSent)
-    dw1000_device.registerCallback("handleReceived", RaingingTag.handleReceived)
-    dw1000_device.setAntennaDelay(C.ANTENNA_DELAY_RASPI)
+    rangingTag.dw1000_device.generalConfiguration("7D:00:22:EA:82:60:3B:9C", C.MODE_LONGDATA_RANGE_ACCURACY)
+    rangingTag.dw1000_device.registerCallback("handleSent", rangingTag.handleSent)
+    rangingTag.dw1000_device.registerCallback("handleReceived", rangingTag.handleReceived)
+    rangingTag.dw1000_device.setAntennaDelay(C.ANTENNA_DELAY_RASPI)
 
-    RaingingTag.receiver()
-    RaingingTag.transmitPoll()
-    RaingingTag.noteActivity()
+    rangingTag.receiver()
+    rangingTag.transmitPoll()
+    rangingTag.noteActivity()
     while 1:
-        self.dw1000_device.loop()
+        rangingTag.dw1000_device.dw1000_device.loop()
 
 except KeyboardInterrupt:
-    raingingTag.dw1000_device.close()
+    rangingTag.dw1000_device.close()
