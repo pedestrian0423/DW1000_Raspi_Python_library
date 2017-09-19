@@ -15,6 +15,7 @@ class DW1000(object):
     spi = spidev.SpiDev()
     _bus = 0
     _device = 0
+    _ss = 0
 
     _chipSelect = None
     _deviceMode = C.IDLE_MODE
@@ -34,11 +35,21 @@ class DW1000(object):
     """
     DW1000 general configuration.
     """
-    def __init__(self, irq, rst=None, bus=None, device=None):
-        self.begin(irq, rst, bus, device)
+    def __init__(self, **kwargs):
+        rst = None
+        bus = None
+        device = None
+        
+        valid_keys = ["irq", "rst", "bus", "device"]
+        for key in valid_keys:
+            self.__dict__[key] = kwargs.get(key)
+        
+        self.begin(self.irq, self.rst, self.bus, self.device)
+
 
     def __del__(self):
         self.close()
+
 
     def begin(self, irq, rst=None, bus=None, device=None):
         """
@@ -74,7 +85,8 @@ class DW1000(object):
         # Set reset pin for physical reset
         if rst is not None:
             self._rst = rst
-            GPIO.setup(self._rst, GPIO.OUTPUT)
+            GPIO.setup(self._rst, GPIO.INPUT)
+
 
     def setup(self, ss):
         """
@@ -107,6 +119,7 @@ class DW1000(object):
         self.enableClock(C.XTI_CLOCK)
         self.manageLDE()
         self.enableClock(C.AUTO_CLOCK)
+
 
     def handleInterrupt(self, channel):
         """
@@ -173,6 +186,18 @@ class DW1000(object):
         pmscctrl0[3] = C.SOFT_RESET_SET
         self.writeBytes(C.PMSC, C.PMSC_CTRL0_SUB, pmscctrl0, 4)
         self.idle()
+
+    def hardReset(self):
+        """
+        This function performs a hard reset on the DW1000 chip.
+        """
+        GPIO.setup(self._rst, GPIO.output)
+        GPIO.output(self._rst, GPIO.LOW)
+        time.sleep(0.002)
+        GPIO.setup(self._rst, GPIO.input)
+        time.sleep(0.010)
+        self.idle()
+
 
     def manageLDE(self):
         """
@@ -326,6 +351,7 @@ class DW1000(object):
 
         self.tune()
 
+
     def setAntennaDelay(self, val):
         """
         This function sets the DW1000 chip's antenna delay value which needs to be calibrated to have better ranging accuracy.
@@ -337,6 +363,7 @@ class DW1000(object):
         self.writeValueToBytes(antennaDelayBytes, val, 5)
         self.writeBytes(C.TX_ANTD, C.NO_SUB, antennaDelayBytes, 2)
         self.writeBytes(C.LDE_CTRL, C.LDE_RXANTD_SUB, antennaDelayBytes, 2)
+
 
     def setEUI(self, currentAddress):
         """
@@ -816,7 +843,7 @@ class DW1000(object):
         self._deviceMode = C.RX_MODE
 
 
-    def startReceive():
+    def startReceive(self):
         """
         This function configures the chip to start the reception of a message sent by another DW1000 chip. 
         It turns on its receiver by setting RXENAB in the system control register.
@@ -853,7 +880,7 @@ class DW1000(object):
             return False
 
 
-    def isReceiveTimeout():
+    def isReceiveTimeout(self):
         """
         This function reads the system event status register and checks if there was a timeout in the message reception.
 
@@ -914,7 +941,7 @@ class DW1000(object):
             estFPPower += (estFPPower + C.PWR_COEFF) * corrFac
         return estFPPower
 
-    def getReceivePower():
+    def getReceivePower(self):
         """
         This function calculates an estimate of the receive power level. See section 4.7.2 of the DW1000 user manual for further details on the calculation.
 
@@ -942,7 +969,7 @@ class DW1000(object):
             estRXPower += (estRXPower + C.PWR_COEFF) * corrFac
         return estRXPower
 
-    def getReceiveQuality():
+    def getReceiveQuality(self):
         """
         This function calculates an estimate of the receive quality.abs
 
@@ -957,12 +984,12 @@ class DW1000(object):
         f2 = float(fpAmpl2Bytes[0] | fpAmpl2Bytes[1] << 8)
         return f2 / noise
 
-    def getReceiveTimestamp():
+    def getReceiveTimestamp(self):
         """
         This function reads the receive timestamp from the register and returns it.
 
         Returns:
-                The timestamp value of the last reception.
+                The timestamp value of the startReceive reception.
         """
         rxTimeBytes = [0] * 5
         readBytes(C.RX_TIME, C.RX_STAMP_SUB, rxTimeBytes, 5)
@@ -973,7 +1000,7 @@ class DW1000(object):
         
         return timestamp
 
-    def correctTimestamp(timestamp):
+    def correctTimestamp(self, timestamp):
         """
         This function corrects the timestamp read from the RX buffer.
 
@@ -1050,45 +1077,43 @@ class DW1000(object):
     Message transmission functions.
     """
 
-    def newTransmit():
+    def newTransmit(self):
         """
         This function prepares the chip for a new transmission. It clears the system control register and also clears the TX latched bits in the SYS_STATUS register.
         """
-        global _deviceMode
-        idle()
-        setArray(_sysctrl, 4, 0x00)
-        clearTransmitStatus()
-        _deviceMode = C.TX_MODE
+        gloself.idle()
+        self.setArray(_sysctrl, 4, 0x00)
+        self.clearTransmitStatus()
+        self._deviceMode = C.TX_MODE
 
-    def startTransmit():
+    def startTransmit(self):
         """
         This function configures the chip to start the transmission of the message previously set in the TX register. It sets TXSTRT bit in the system control register to begin transmission.
         """
-        global _sysctrl, _deviceMode
-        writeBytes(C.TX_FCTRL, C.NO_SUB, _txfctrl, 5)
-        setBit(_sysctrl, 4, C.SFCST_BIT, False)
-        setBit(_sysctrl, 4, C.TXSTRT_BIT, True)
-        writeBytes(C.SYS_CTRL, C.NO_SUB, _sysctrl, 4)
-        if _permanentReceive:
-            setArray(_sysctrl, 4, 0x00)
-            _deviceMode = C.RX_MODE
-            startReceive()
+        self.writeBytes(C.TX_FCTRL, C.NO_SUB, _txfctrl, 5)
+        self.setBit(self._sysctrl, 4, C.SFCST_BIT, False)
+        setBit(self._sysctrl, 4, C.TXSTRT_BIT, True)
+        self.writeBytes(C.SYS_CTRL, C.NO_SUB, self._sysctrl, 4)
+        if self._permanentReceive:
+            setArray(self._sysctrl, 4, 0x00)
+            self._deviceMode = C.RX_MODE
+            self.startReceive()
         else:
-            _deviceMode = C.IDLE_MODE
+            self._deviceMode = C.IDLE_MODE
 
-    def clearTransmitStatus():
+    def clearTransmitStatus(self):
         """
         This function clears the event status register at the bits related to the transmission of a message.
         """
-        setBit(_sysstatus, 5, C.TXFRB_BIT, True)
-        setBit(_sysstatus, 5, C.TXPRS_BIT, True)
-        setBit(_sysstatus, 5, C.TXPHS_BIT, True)
-        setBit(_sysstatus, 5, C.TXFRS_BIT, True)
+        self.setBit(_sysstatus, 5, C.TXFRB_BIT, True)
+        self.setBit(_sysstatus, 5, C.TXPRS_BIT, True)
+        self.setBit(_sysstatus, 5, C.TXPHS_BIT, True)
+        self.setBit(_sysstatus, 5, C.TXFRS_BIT, True)
 
-        writeBytes(C.SYS_STATUS, C.NO_SUB, _sysstatus, 5)
+        self.writeBytes(C.SYS_STATUS, C.NO_SUB, _sysstatus, 5)
 
 
-    def setDelay(delay, unit):
+    def setDelay(self, delay, unit):
         """
         This function configures the chip to activate a delay between transmissions or receptions.
 
@@ -1106,7 +1131,7 @@ class DW1000(object):
 
         delayBytes = [None] * 5
         sysTimeBytes = [None] * 5
-        readBytes(C.SYS_TIME, C.NO_SUB, sysTimeBytes, 5)
+        self.readBytes(C.SYS_TIME, C.NO_SUB, sysTimeBytes, 5)
         futureTimeTS = 0
         for i in range(0, 5):
             futureTimeTS |= sysTimeBytes[i] << (i * 8)
@@ -1132,7 +1157,7 @@ class DW1000(object):
         """
         This function clears all the status register by writing a 1 to every bits in it. 
         """
-        setArray(self._sysstatus, 5, 0xFF)
+        self.setArray(self._sysstatus, 5, 0xFF)
         writeBytes(C.SYS_STATUS, C.NO_SUB, self._sysstatus, 5)
 
 
@@ -1149,12 +1174,6 @@ class DW1000(object):
         for i in range(0, 5):
             timeStamp |= int(txTimeBytes[i] << (i * 8))
         return timeStamp
-
-
-
-
-
-
 
             
     """
