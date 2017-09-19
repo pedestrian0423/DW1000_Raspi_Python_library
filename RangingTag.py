@@ -27,7 +27,7 @@ class RangingTag():
     POLL_RANGE_FREQ = 1000 # the distance between the tag and the anchor will be estimated every second.
 
     def __init__(self, **kwargs):
-        self.dw1000_device = DW1000.DW1000(kwargs)
+        self.dw1000_device = DW1000.DW1000(**kwargs)
 
 
 
