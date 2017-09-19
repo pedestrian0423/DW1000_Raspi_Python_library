@@ -39,10 +39,12 @@ class DW1000(object):
         rst = None
         bus = None
         device = None
-        
+
         valid_keys = ["irq", "rst", "bus", "device"]
         for key in valid_keys:
             self.__dict__[key] = kwargs.get(key)
+
+        self.spi = spidev.SpiDev()
         
         self.begin(self.irq, self.rst, self.bus, self.device)
 
@@ -1349,14 +1351,14 @@ class DW1000(object):
                 header[2] = offset >> 7
                 headerLen = headerLen + 2
 
-        GPIO.output(_chipSelect, GPIO.LOW)
+        GPIO.output(self._chipSelect, GPIO.LOW)
         for i in range(0, headerLen):
-            spi.xfer([int(header[i])])
+            self.spi.xfer([int(header[i])])
 
         for i in range(0, n):
-            data[i] = spi.xfer([C.JUNK])[0]
+            data[i] = self.spi.xfer([C.JUNK])[0]
 
-        GPIO.output(_chipSelect, GPIO.HIGH)
+        GPIO.output(self._chipSelect, GPIO.HIGH)
 
 
     def writeBytes(self, cmd, offset, data, dataSize):
@@ -1384,15 +1386,15 @@ class DW1000(object):
                 header[2] = offset >> 7
                 headerLen = headerLen + 2
 
-        GPIO.output(_chipSelect, GPIO.LOW)
+        GPIO.output(self._chipSelect, GPIO.LOW)
         for i in range(0, headerLen):
-            spi.xfer([int(header[i])])
+            self.spi.xfer([int(header[i])])
 
         for i in range(0, dataSize):
             if (data[i] != None):
-                spi.xfer([int(data[i])])
+                self.spi.xfer([int(data[i])])
 
-        GPIO.output(_chipSelect, GPIO.HIGH)
+        GPIO.output(self._chipSelect, GPIO.HIGH)
 
 
     def setBit(self, data, n, bit, val):
