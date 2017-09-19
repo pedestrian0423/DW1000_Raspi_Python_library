@@ -172,7 +172,7 @@ try:
     rangingTag.transmitPoll()
     rangingTag.noteActivity()
     while 1:
-        rangingTag.dw1000_device.dw1000_device.loop()
+        rangingTag.loop()
 
 except KeyboardInterrupt:
     rangingTag.dw1000_device.close()
