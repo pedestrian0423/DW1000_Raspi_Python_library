@@ -150,8 +150,8 @@ class RangingTag():
 
 
 
-irq = 19
-ss = 16
+irq = 5
+ss = 6
 rst = None
 bus = 0
 device = 0

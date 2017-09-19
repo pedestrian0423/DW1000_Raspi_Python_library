@@ -45,6 +45,7 @@ class DW1000(object):
             self.__dict__[key] = kwargs.get(key)
 
         self.spi = spidev.SpiDev()
+        print self.spi
         
         self.begin(self.irq, self.rst, self.bus, self.device)
 
@@ -130,21 +131,21 @@ class DW1000(object):
         # print("\nInterrupt!")
         self._sysstatus = self.readBytes(C.SYS_STATUS, C.NO_SUB, self._sysstatus, 5)
         # print(_sysstatus)
-        msgReceived = getBit(self._sysstatus, 5, C.RXFCG_BIT)
-        receiveTimeStampAvailable = getBit(self._sysstatus, 5, C.LDEDONE_BIT)
-        transmitDone = getBit(self._sysstatus, 5, C.TXFRS_BIT)
+        msgReceived = self.getBit(self._sysstatus, 5, C.RXFCG_BIT)
+        receiveTimeStampAvailable = self.getBit(self._sysstatus, 5, C.LDEDONE_BIT)
+        transmitDone = self.getBit(self._sysstatus, 5, C.TXFRS_BIT)
         if transmitDone:
             self.callbacks["handleSent"]()
             self.clearTransmitStatus()
         if receiveTimeStampAvailable:
             self.setBit(self._sysstatus, 5, C.LDEDONE_BIT, True)
             self.writeBytes(C.SYS_STATUS, C.NO_SUB, self._sysstatus, 5)
-        if isReceiveFailed():
+        if self.isReceiveFailed():
             self.clearReceiveStatus()
             if self._permanentReceive:
                 self.newReceive()
                 self.startReceive()
-        elif isReceiveTimeout():
+        elif self.isReceiveTimeout():
             self.clearReceiveStatus()
             if self._permanentReceive:
                 self.newReceive()
@@ -1171,7 +1172,7 @@ class DW1000(object):
                 The timestamp value of the last transmission.
         """
         txTimeBytes = [0] * 5
-        txTimeBytes = readBytes(C.TX_TIME, C.TX_STAMP_SUB, txTimeBytes, 5)
+        txTimeBytes = self.readBytes(C.TX_TIME, C.TX_STAMP_SUB, txTimeBytes, 5)
         timeStamp = 0
         for i in range(0, 5):
             timeStamp |= int(txTimeBytes[i] << (i * 8))
@@ -1358,7 +1359,7 @@ class DW1000(object):
             data[i] = self.spi.xfer([C.JUNK])[0]
 
         GPIO.output(self._chipSelect, GPIO.HIGH)
-
+        print "DW1000.py 1366:\t {0}",data
         return data
 
 
@@ -1488,7 +1489,7 @@ class DW1000(object):
         self.writeBytes(C.OTP_IF, C.OTP_ADDR_SUB, addressBytes, 2)
         self.writeBytes(C.OTP_IF, C.OTP_CTRL_SUB, [C.OTP_STEP2], 1)
         self.writeBytes(C.OTP_IF, C.OTP_CTRL_SUB, [C.OTP_STEP3], 1)
-        self.readBytes(C.OTP_IF, C.OTP_RDAT_SUB, data, 4)
+        self.data = self.readBytes(C.OTP_IF, C.OTP_RDAT_SUB, data, 4)
         self.writeBytes(C.OTP_IF, C.OTP_CTRL_SUB, [C.OTP_STEP5], 1)
         return data
 
