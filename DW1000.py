@@ -128,7 +128,7 @@ class DW1000(object):
         Callback invoked on the rising edge of the interrupt pin. Handle the configured interruptions.
         """
         # print("\nInterrupt!")
-        readBytes(C.SYS_STATUS, C.NO_SUB, self._sysstatus, 5)
+        self._sysstatus = self.readBytes(C.SYS_STATUS, C.NO_SUB, self._sysstatus, 5)
         # print(_sysstatus)
         msgReceived = getBit(self._sysstatus, 5, C.RXFCG_BIT)
         receiveTimeStampAvailable = getBit(self._sysstatus, 5, C.LDEDONE_BIT)
@@ -179,7 +179,7 @@ class DW1000(object):
         This function performs a soft reset on the DW1000 chip.
         """
         pmscctrl0 = [0] * 4
-        self.readBytes(C.PMSC, C.PMSC_CTRL0_SUB, pmscctrl0, 4)
+        pmscctrl0 = self.readBytes(C.PMSC, C.PMSC_CTRL0_SUB, pmscctrl0, 4)
         pmscctrl0[0] = C.SOFT_RESET_SYSCLKS
         self.writeBytes(C.PMSC, C.PMSC_CTRL0_SUB, pmscctrl0, 4)
         pmscctrl0[3] = C.SOFT_RESET_CLEAR
@@ -208,8 +208,8 @@ class DW1000(object):
         """
         pmscctrl0 = [None] * 4
         otpctrl = [None] * 2
-        self.readBytes(C.PMSC, C.PMSC_CTRL0_SUB, pmscctrl0, 4)
-        self.readBytes(C.OTP_IF, C.OTP_CTRL_SUB, otpctrl, 2)
+        pmscctrl0 = self.readBytes(C.PMSC, C.PMSC_CTRL0_SUB, pmscctrl0, 4)
+        otpctrl = self.readBytes(C.OTP_IF, C.OTP_CTRL_SUB, otpctrl, 2)
 
         pmscctrl0[0] = C.LDE_L1STEP1
         pmscctrl0[1] = C.LDE_L1STEP2
@@ -334,11 +334,11 @@ class DW1000(object):
         This function resets the DW1000 chip to the idle state mode and reads all the configuration registers to prepare for a new configuration.
         """
         self.idle()
-        self.readBytes(C.PANADR, C.NO_SUB, self._networkAndAddress, 4)
-        self.readBytes(C.SYS_CFG, C.NO_SUB, self._syscfg, 4)
-        self.readBytes(C.CHAN_CTRL, C.NO_SUB, self._chanctrl, 4)
-        self.readBytes(C.TX_FCTRL, C.NO_SUB, self._txfctrl, 5)
-        self.readBytes(C.SYS_MASK, C.NO_SUB, self._sysmask, 4)
+        self._networkAndAddress = self.readBytes(C.PANADR, C.NO_SUB, self._networkAndAddress, 4)
+        self._syscfg = self.readBytes(C.SYS_CFG, C.NO_SUB, self._syscfg, 4)
+        self._chanctrl = self.readBytes(C.CHAN_CTRL, C.NO_SUB, self._chanctrl, 4)
+        self._txfctrl = self.readBytes(C.TX_FCTRL, C.NO_SUB, self._txfctrl, 5)
+        self._sysmask = self.readBytes(C.SYS_MASK, C.NO_SUB, self._sysmask, 4)
 
     def commitConfiguration(self):
         """
@@ -537,9 +537,9 @@ class DW1000(object):
         data = [0] * 4
         data2 = [0] * 8
         data3 = [0] * 4
-        self.readBytes(C.DEV_ID, C.NO_SUB, data, 4)
-        self.readBytes(C.EUI, C.NO_SUB, data2, 8)
-        self.readBytes(C.PANADR, C.NO_SUB, data3, 4)
+        data = self.readBytes(C.DEV_ID, C.NO_SUB, data, 4)
+        data2 = self.readBytes(C.EUI, C.NO_SUB, data2, 8)
+        data3 = self.readBytes(C.PANADR, C.NO_SUB, data3, 4)
         print("\nDevice ID %02X - model: %d, version: %d, revision: %d" %
             ((data[3] << 8) | data[2], (data[1]), (data[0] >> 4) & C.MASK_NIBBLE, data[0] & C.MASK_NIBBLE))
         print("Unique ID: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X" % (
@@ -810,7 +810,7 @@ class DW1000(object):
                     PLL=0X02.
         """
         pmscctrl0 = [None] * 4
-        self.readBytes(C.PMSC, C.PMSC_CTRL0_SUB, pmscctrl0, 4)
+        pmscctrl0 = self.readBytes(C.PMSC, C.PMSC_CTRL0_SUB, pmscctrl0, 4)
         if clock == C.AUTO_CLOCK:
             pmscctrl0[0] = C.AUTO_CLOCK
             pmscctrl0[1] = pmscctrl0[1] & C.ENABLE_CLOCK_MASK1
@@ -921,10 +921,10 @@ class DW1000(object):
         fpAmpl2Bytes = [None] * 2
         fpAmpl3Bytes = [None] * 2
         rxFrameInfo = [None] * 4
-        self.readBytes(C.RX_TIME, C.FP_AMPL1_SUB, fpAmpl1Bytes, 2)
-        self.readBytes(C.RX_FQUAL, C.FP_AMPL2_SUB, fpAmpl2Bytes, 2)
-        self.readBytes(C.RX_FQUAL, C.FP_AMPL3_SUB, fpAmpl3Bytes, 2)
-        self.readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
+        fpAmpl1Bytes = self.readBytes(C.RX_TIME, C.FP_AMPL1_SUB, fpAmpl1Bytes, 2)
+        fpAmpl2Bytes = self.readBytes(C.RX_FQUAL, C.FP_AMPL2_SUB, fpAmpl2Bytes, 2)
+        fpAmpl3Bytes = self.readBytes(C.RX_FQUAL, C.FP_AMPL3_SUB, fpAmpl3Bytes, 2)
+        rxFrameInfo = self.readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
         f1 = fpAmpl1Bytes[0] | fpAmpl1Bytes[1] << 8
         f2 = fpAmpl2Bytes[0] | fpAmpl2Bytes[1] << 8
         f3 = fpAmpl3Bytes[0] | fpAmpl3Bytes[1] << 8
@@ -952,8 +952,8 @@ class DW1000(object):
         """
         cirPwrBytes = [None] * 2
         rxFrameInfo = [None] * 4
-        readBytes(C.RX_FQUAL, C.CIR_PWR_SUB, cirPwrBytes, 2)
-        readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
+        cirPwrBytes = readBytes(C.RX_FQUAL, C.CIR_PWR_SUB, cirPwrBytes, 2)
+        rxFrameInfo = readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
         cir = cirPwrBytes[0] | cirPwrBytes[1] << 8
         N = ((rxFrameInfo[2] >> 4) & C.MASK_LS_BYTE) | rxFrameInfo[3] << 4
         if _operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_16MHZ:
@@ -980,8 +980,8 @@ class DW1000(object):
         """
         noiseBytes = [None] * 2
         fpAmpl2Bytes = [None] * 2
-        readBytes(C.RX_FQUAL, C.STD_NOISE_SUB, noiseBytes, 2)
-        readBytes(C.RX_FQUAL, C.FP_AMPL2_SUB, fpAmpl2Bytes, 2)
+        noiseBytes = readBytes(C.RX_FQUAL, C.STD_NOISE_SUB, noiseBytes, 2)
+        fpAmpl2Bytes = readBytes(C.RX_FQUAL, C.FP_AMPL2_SUB, fpAmpl2Bytes, 2)
         noise = float(noiseBytes[0] | noiseBytes[1] << 8)
         f2 = float(fpAmpl2Bytes[0] | fpAmpl2Bytes[1] << 8)
         return f2 / noise
@@ -994,7 +994,7 @@ class DW1000(object):
                 The timestamp value of the startReceive reception.
         """
         rxTimeBytes = [0] * 5
-        readBytes(C.RX_TIME, C.RX_STAMP_SUB, rxTimeBytes, 5)
+        rxTimeBytes = readBytes(C.RX_TIME, C.RX_STAMP_SUB, rxTimeBytes, 5)
         timestamp = 0
         for i in range(0, 5):
             timestamp |= rxTimeBytes[i] << (i * 8)
@@ -1133,7 +1133,7 @@ class DW1000(object):
 
         delayBytes = [None] * 5
         sysTimeBytes = [None] * 5
-        self.readBytes(C.SYS_TIME, C.NO_SUB, sysTimeBytes, 5)
+        sysTimeBytes = self.readBytes(C.SYS_TIME, C.NO_SUB, sysTimeBytes, 5)
         futureTimeTS = 0
         for i in range(0, 5):
             futureTimeTS |= sysTimeBytes[i] << (i * 8)
@@ -1171,7 +1171,7 @@ class DW1000(object):
                 The timestamp value of the last transmission.
         """
         txTimeBytes = [0] * 5
-        readBytes(C.TX_TIME, C.TX_STAMP_SUB, txTimeBytes, 5)
+        txTimeBytes = readBytes(C.TX_TIME, C.TX_STAMP_SUB, txTimeBytes, 5)
         timeStamp = 0
         for i in range(0, 5):
             timeStamp |= int(txTimeBytes[i] << (i * 8))
@@ -1236,12 +1236,12 @@ class DW1000(object):
         len = 0
         if _deviceMode == C.RX_MODE:
             rxFrameInfo = [0] * 4
-            readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
+            rxFrameInfo = readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
             len = (((rxFrameInfo[1] << 8) | rxFrameInfo[0]) & C.GET_DATA_MASK)
             len = len - 2
 
         dataBytes = [""] * len
-        readBytes(C.RX_BUFFER, C.NO_SUB, dataBytes, len)
+        dataBytes = readBytes(C.RX_BUFFER, C.NO_SUB, dataBytes, len)
         data = "".join(chr(i) for i in dataBytes)
         return data
 
@@ -1258,7 +1258,7 @@ class DW1000(object):
         """
         data = [0] * datalength
         time.sleep(0.000005)
-        readBytes(C.RX_BUFFER, C.NO_SUB, data, datalength)
+        data = readBytes(C.RX_BUFFER, C.NO_SUB, data, datalength)
         return data
 
 
@@ -1358,6 +1358,8 @@ class DW1000(object):
             data[i] = self.spi.xfer([C.JUNK])[0]
 
         GPIO.output(self._chipSelect, GPIO.HIGH)
+
+        return data
 
 
     def writeBytes(self, cmd, offset, data, dataSize):
