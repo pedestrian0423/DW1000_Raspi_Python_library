@@ -16,7 +16,7 @@ class RangingAnchor(object):
     protocolFailed = False
     sentAck = False
     receivedAck = False
-    LEN_DATA = 16
+    LEN_DATA = 18
     data = [0] * LEN_DATA
     timePollAckSentTS = 0
     timePollAckReceivedTS = 0
@@ -161,9 +161,9 @@ class RangingAnchor(object):
                 self.timeRangeReceivedTS = self.dw1000_device.getReceiveTimestamp()
                 self.expectedMsgId = C.POLL
                 if self.protocolFailed == False:
-                    self.timePollSentTS = self.dw1000_device.getTimeStamp(self.data, 1)
-                    self.timePollAckReceivedTS = self.dw1000_device.getTimeStamp(self.data, 6)
-                    self.timeRangeSentTS = self.dw1000_device.getTimeStamp(self.data, 11)
+                    self.timePollSentTS = self.dw1000_device.getTimeStamp(self.data, 3)
+                    self.timePollAckReceivedTS = self.dw1000_device.getTimeStamp(self.data, 8)
+                    self.timeRangeSentTS = self.dw1000_device.getTimeStamp(self.data, 13)
                     self.computeRangeAsymmetric()
                     self.transmitRangeAcknowledge()
                     distance = (self.timeComputedRangeTS % C.TIME_OVERFLOW) * C.DISTANCE_OF_RADIO

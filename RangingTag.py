@@ -11,7 +11,7 @@ import DW1000Constants as C
 class RangingTag():
     dw1000_device = None
 
-    LEN_DATA = 16
+    LEN_DATA = 18
     data = [0] * LEN_DATA
     lastActivity = 0
     lastPoll = 0
@@ -106,9 +106,9 @@ class RangingTag():
         self.data[1] = 0xAB
         self.data[2] = 0xCD
         self.timeRangeSentTS = self.dw1000_device.setDelay(self.REPLY_DELAY_TIME_US, C.MICROSECONDS)
-        self.dw1000_device.setTimeStamp(self.data, self.timePollSentTS, 1)
-        self.dw1000_device.setTimeStamp(self.data, self.timePollAckReceivedTS, 6)
-        self.dw1000_device.setTimeStamp(self.data, self.timeRangeSentTS, 11)
+        self.dw1000_device.setTimeStamp(self.data, self.timePollSentTS, 3)
+        self.dw1000_device.setTimeStamp(self.data, self.timePollAckReceivedTS, 8)
+        self.dw1000_device.setTimeStamp(self.data, self.timeRangeSentTS, 13)
         self.dw1000_device.setData(self.data, self.LEN_DATA)
         self.dw1000_device.startTransmit()
 
