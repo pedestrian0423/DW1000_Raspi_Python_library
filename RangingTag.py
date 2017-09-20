@@ -89,6 +89,8 @@ class RangingTag():
         while (self.millis() - self.lastPoll < self.POLL_RANGE_FREQ):
             pass
         self.dw1000_device.newTransmit()
+        for i in range(0, None, 1, self.LEN_DATA):
+            self.data[i] = 0
         self.data[0] = C.POLL
         self.data[1] = 0xAB
         self.data[2] = 0xCD
@@ -102,6 +104,8 @@ class RangingTag():
         This function sends the range message containing the timestamps used to calculate the range between the devices.
         """
         self.dw1000_device.newTransmit()
+        for i in range(0, None, 1, self.LEN_DATA):
+            self.data[i] = 0
         self.data[0] = C.RANGE
         self.data[1] = 0xAB
         self.data[2] = 0xCD

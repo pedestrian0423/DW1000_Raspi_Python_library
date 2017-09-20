@@ -76,6 +76,8 @@ class RangingAnchor(object):
         This function sends the polling acknowledge message which is used to confirm the reception of the polling message. 
         """        
         self.dw1000_device.newTransmit()
+        for i in range(0,None,1,self.LEN_DATA):
+            self.data[i] = 0
         self.data[0] = C.POLL_ACK
         self.data[1] = 0xEF
         self.data[2] = 0x01
@@ -89,6 +91,8 @@ class RangingAnchor(object):
         This functions sends the range acknowledge message which tells the tag that the ranging function was successful and another ranging transmission can begin.
         """
         self.dw1000_device.newTransmit()
+        for i in range(0,None,1,self.LEN_DATA):
+            self.data[i] = 0
         self.data[0] = C.RANGE_REPORT
         self.data[1] = 0xEF
         self.data[2] = 0x01
@@ -101,6 +105,8 @@ class RangingAnchor(object):
         This functions sends the range failed message which tells the tag that the ranging function has failed and to start another ranging transmission.
         """    
         self.dw1000_device.newTransmit()
+        for i in range(0,None,1,self.LEN_DATA):
+            self.data[i] = 0
         self.data[0] = C.RANGE_FAILED
         self.dw1000_device.setData(self.data, self.LEN_DATA)
         self.dw1000_device.startTransmit()
