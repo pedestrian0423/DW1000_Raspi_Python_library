@@ -136,24 +136,24 @@ class RangingAnchor(object):
             self.sentAck = False
             msgId = self.data[0]
             if msgId == C.POLL_ACK:
-                self.timePollAckSentTS = DW1000.getTransmitTimestamp()
+                self.timePollAckSentTS = self.dw1000_device.getTransmitTimestamp()
                 self.noteActivity()
 
         if self.receivedAck:
             self.receivedAck = False
-            self.data = DW1000.getData(self.LEN_DATA)
+            self.data = self.dw1000_device.getData(self.LEN_DATA)
             msgId = self.data[0]
             if msgId != self.expectedMsgId:
                 self.protocolFailed = True
 
-            shortAddress = [] * 2
+            shortAddress = [0] * 2
             shortAddress[0] = self.data[1]
             shortAddress[1] = self.data[2]
             print("Short Address: %02X:%02X" % (shortAddress[1], shortAddress[0]))
 
             if msgId == C.POLL:
                 self.protocolFailed = False
-                self.timePollReceivedTS = DW1000.getReceiveTimestamp()
+                self.timePollReceivedTS = self.dw1000_device.getReceiveTimestamp()
                 self.expectedMsgId = C.RANGE
                 self.transmitPollAck()
                 self.noteActivity()
@@ -161,9 +161,9 @@ class RangingAnchor(object):
                 self.timeRangeReceivedTS = self.dw1000_device.getReceiveTimestamp()
                 self.expectedMsgId = C.POLL
                 if self.protocolFailed == False:
-                    self.timePollSentTS = DW1000.getTimeStamp(self.data, 1)
-                    self.timePollAckReceivedTS = DW1000.getTimeStamp(self.data, 6)
-                    self.timeRangeSentTS = DW1000.getTimeStamp(self.data, 11)
+                    self.timePollSentTS = self.dw1000_device.getTimeStamp(self.data, 1)
+                    self.timePollAckReceivedTS = self.dw1000_device.getTimeStamp(self.data, 6)
+                    self.timeRangeSentTS = self.dw1000_device.getTimeStamp(self.data, 11)
                     self.computeRangeAsymmetric()
                     self.transmitRangeAcknowledge()
                     distance = (self.timeComputedRangeTS % C.TIME_OVERFLOW) * C.DISTANCE_OF_RADIO

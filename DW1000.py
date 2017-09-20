@@ -953,11 +953,11 @@ class DW1000(object):
         """
         cirPwrBytes = [None] * 2
         rxFrameInfo = [None] * 4
-        cirPwrBytes = readBytes(C.RX_FQUAL, C.CIR_PWR_SUB, cirPwrBytes, 2)
-        rxFrameInfo = readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
+        cirPwrBytes = self.readBytes(C.RX_FQUAL, C.CIR_PWR_SUB, cirPwrBytes, 2)
+        rxFrameInfo = self.readBytes(C.RX_FINFO, C.NO_SUB, rxFrameInfo, 4)
         cir = cirPwrBytes[0] | cirPwrBytes[1] << 8
         N = ((rxFrameInfo[2] >> 4) & C.MASK_LS_BYTE) | rxFrameInfo[3] << 4
-        if _operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_16MHZ:
+        if self._operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_16MHZ:
             A = C.A_16MHZ
             corrFac = C.CORRFAC_16MHZ
         else:
@@ -995,11 +995,11 @@ class DW1000(object):
                 The timestamp value of the startReceive reception.
         """
         rxTimeBytes = [0] * 5
-        rxTimeBytes = readBytes(C.RX_TIME, C.RX_STAMP_SUB, rxTimeBytes, 5)
+        rxTimeBytes = self.readBytes(C.RX_TIME, C.RX_STAMP_SUB, rxTimeBytes, 5)
         timestamp = 0
         for i in range(0, 5):
             timestamp |= rxTimeBytes[i] << (i * 8)
-        timestamp = int(round(correctTimestamp(timestamp)))
+        timestamp = int(round(self.correctTimestamp(timestamp)))
         
         return timestamp
 
@@ -1013,7 +1013,7 @@ class DW1000(object):
         Returns: 
                 The corrected timestamp.
         """
-        rxPowerBase = -(getReceivePower() + 61.0) * 0.5
+        rxPowerBase = -(self.getReceivePower() + 61.0) * 0.5
         rxPowerBaseLow = int(math.floor(rxPowerBase))
         rxPowerBaseHigh = rxPowerBaseLow + 1
 
@@ -1024,8 +1024,8 @@ class DW1000(object):
             rxPowerBaseLow = 17
             rxPowerBaseHigh = 17
 
-        if _operationMode[C.CHANNEL_BIT] == C.CHANNEL_4 or _operationMode[C.CHANNEL_BIT] == C.CHANNEL_7:
-            if _operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_16MHZ:
+        if self._operationMode[C.CHANNEL_BIT] == C.CHANNEL_4 or self._operationMode[C.CHANNEL_BIT] == C.CHANNEL_7:
+            if self._operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_16MHZ:
                 if rxPowerBaseHigh < C.BIAS_900_16_ZERO:
                     rangeBiasHigh = - C.BIAS_900_16[rxPowerBaseHigh]
                 else:
@@ -1048,7 +1048,7 @@ class DW1000(object):
                     rangeBiasLow = C.BIAS_900_64[rxPowerBaseLow]
                 rangeBiasLow <<= 1
         else:
-            if _operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_16MHZ:
+            if self._operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_16MHZ:
                 if rxPowerBaseHigh < C.BIAS_500_16_ZERO:
                     rangeBiasHigh = - C.BIAS_500_16[rxPowerBaseHigh]
                 else:
@@ -1059,7 +1059,7 @@ class DW1000(object):
                 else:
                     rangeBiasLow = C.BIAS_500_16[rxPowerBaseLow]
                 rangeBiasLow <<= 1
-            elif _operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_64MHZ:
+            elif self._operationMode[C.PULSE_FREQUENCY_BIT] == C.TX_PULSE_FREQ_64MHZ:
                 if rxPowerBaseHigh < C.BIAS_500_64_ZERO:
                     rangeBiasHigh = - C.BIAS_500_64[rxPowerBaseHigh]
                 else:
@@ -1127,10 +1127,10 @@ class DW1000(object):
         Returns:
                 The timestamp's value with the added delay and antennaDelay.
         """
-        if _deviceMode == C.TX_MODE:
-            self.setBit(_sysctrl, 4, C.TXDLYS_BIT, True)
+        if self._deviceMode == C.TX_MODE:
+            self.setBit(self._sysctrl, 4, C.TXDLYS_BIT, True)
         elif self._deviceMode == C.RX_MODE:
-            self.setBit(_sysctrl, 4, C.RXDLYE_BIT, True)
+            self.setBit(self._sysctrl, 4, C.RXDLYE_BIT, True)
 
         delayBytes = [None] * 5
         sysTimeBytes = [None] * 5
@@ -1259,7 +1259,7 @@ class DW1000(object):
         """
         data = [0] * datalength
         time.sleep(0.000005)
-        data = readBytes(C.RX_BUFFER, C.NO_SUB, data, datalength)
+        data = self.readBytes(C.RX_BUFFER, C.NO_SUB, data, datalength)
         return data
 
 
