@@ -131,7 +131,7 @@ class RangingTag():
 
         if self.receivedAck:
             self.receivedAck = False
-            data = self.dw1000_device.getData(self.LEN_DATA)
+            self.data = self.dw1000_device.getData(self.LEN_DATA)
             msgID = self.data[0]    
             if msgID != self.expectedMsgId:
                 self.expectedMsgId = C.POLL_ACK

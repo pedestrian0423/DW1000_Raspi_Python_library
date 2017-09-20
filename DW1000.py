@@ -1260,6 +1260,7 @@ class DW1000(object):
         data = [0] * datalength
         time.sleep(0.000005)
         data = self.readBytes(C.RX_BUFFER, C.NO_SUB, data, datalength)
+        print "DW1000.py 1263:\t ", data
         return data
 
 
@@ -1359,7 +1360,6 @@ class DW1000(object):
             data[i] = self.spi.xfer([C.JUNK])[0]
 
         GPIO.output(self._chipSelect, GPIO.HIGH)
-        print "DW1000.py 1366:\t {0}",data
         return data
 
 
