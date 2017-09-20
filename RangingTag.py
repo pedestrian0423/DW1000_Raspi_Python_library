@@ -90,6 +90,8 @@ class RangingTag():
             pass
         self.dw1000_device.newTransmit()
         self.data[0] = C.POLL
+        self.data[1] = 0xAB
+        self.data[2] = 0xCD
         self.dw1000_device.setData(self.data, self.LEN_DATA)
         self.dw1000_device.startTransmit()
         self.lastPoll = self.millis()
@@ -101,6 +103,8 @@ class RangingTag():
         """
         self.dw1000_device.newTransmit()
         self.data[0] = C.RANGE
+        self.data[1] = 0xAB
+        self.data[2] = 0xCD
         self.timeRangeSentTS = self.dw1000_device.setDelay(self.REPLY_DELAY_TIME_US, C.MICROSECONDS)
         self.dw1000_device.setTimeStamp(self.data, self.timePollSentTS, 1)
         self.dw1000_device.setTimeStamp(self.data, self.timePollAckReceivedTS, 6)
@@ -133,6 +137,12 @@ class RangingTag():
                 self.expectedMsgId = C.POLL_ACK
                 self.transmitPoll()
                 return
+            
+            shortAddress = [] * 2
+            shortAddress[0] = self.data[1]
+            shortAddress[1] = self.data[2]
+            print("Short Address: %02X:%02X" % (shortAddress[1], shortAddress[0]))
+
             if msgID == C.POLL_ACK:
                 self.timePollAckReceivedTS = self.dw1000_device.getReceiveTimestamp()
                 self.expectedMsgId = C.RANGE_REPORT
