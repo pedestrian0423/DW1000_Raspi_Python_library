@@ -78,7 +78,7 @@ class RangingAnchor(object):
         self.dw1000_device.newTransmit()
         self.data[0] = C.POLL_ACK
         self.data[1] = 0xEF
-        self.data[2] = 0x00
+        self.data[2] = 0x01
         self.dw1000_device.setDelay(self.REPLY_DELAY_TIME_US, C.MICROSECONDS)
         self.dw1000_device.setData(self.data, self.LEN_DATA)
         self.dw1000_device.startTransmit()
@@ -90,6 +90,8 @@ class RangingAnchor(object):
         """
         self.dw1000_device.newTransmit()
         self.data[0] = C.RANGE_REPORT
+        self.data[1] = 0xEF
+        self.data[2] = 0x01
         self.dw1000_device.setData(self.data, self.LEN_DATA)
         self.dw1000_device.startTransmit()
 
@@ -148,7 +150,7 @@ class RangingAnchor(object):
             shortAddress[0] = self.data[1]
             shortAddress[1] = self.data[2]
             print("Short Address: %02X:%02X" % (shortAddress[1], shortAddress[0]))
-            
+
             if msgId == C.POLL:
                 self.protocolFailed = False
                 self.timePollReceivedTS = DW1000.getReceiveTimestamp()
