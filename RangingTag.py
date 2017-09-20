@@ -89,7 +89,7 @@ class RangingTag():
         while (self.millis() - self.lastPoll < self.POLL_RANGE_FREQ):
             pass
         self.dw1000_device.newTransmit()
-        for i in range(0, None, 1, self.LEN_DATA):
+        for i in range(0, self.LEN_DATA):
             self.data[i] = 0
         self.data[0] = C.POLL
         self.data[1] = 0xAB
@@ -104,7 +104,7 @@ class RangingTag():
         This function sends the range message containing the timestamps used to calculate the range between the devices.
         """
         self.dw1000_device.newTransmit()
-        for i in range(0, None, 1, self.LEN_DATA):
+        for i in range(0, self.LEN_DATA):
             self.data[i] = 0
         self.data[0] = C.RANGE
         self.data[1] = 0xAB
@@ -142,7 +142,7 @@ class RangingTag():
                 self.transmitPoll()
                 return
             
-            shortAddress = [] * 2
+            shortAddress = [0] * 2
             shortAddress[0] = self.data[1]
             shortAddress[1] = self.data[2]
             print("Short Address: %02X:%02X" % (shortAddress[1], shortAddress[0]))
@@ -154,6 +154,7 @@ class RangingTag():
                 self.noteActivity()
             elif msgID == C.RANGE_REPORT:
                 self.expectedMsgId = C.POLL_ACK
+                # need to add distance information to data
                 self.transmitPoll()
                 self.noteActivity()
             elif msgID == C.RANGE_FAILED:
